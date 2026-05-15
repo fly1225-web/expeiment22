@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>二阶线性常系数齐次微分方程 | 动态演示：过阻尼/临界阻尼/欠阻尼</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #f0f4fa 0%, #e0e8f0 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(2px);
+            border-radius: 56px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 24px 28px 32px;
+            transition: all 0.2s;
+            border: 1px solid #e2dac8;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1f4870, #2f8b6f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            margin: 0 0 6px;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            text-align: center;
+            color: #5c6f87;
+            font-weight: 500;
+            border-bottom: 1px solid #dce5ef;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 18px;
+            padding-bottom: 6px;
+        }
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .graph-box {
+            flex: 1;
+            min-width: 400px;
+            background: #fefcf5;
+            border-radius: 44px;
+            padding: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+        .graph-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #2c6a5e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: inset 0 0 0 1px #efe2cf, 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .control-bar {
+            margin-top: 12px;
+            background: #eef2f0;
+            border-radius: 48px;
+            padding: 18px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .slider-group {
+            flex: 2;
+            min-width: 180px;
+        }
+        .slider-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #2c5a6e;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            -webkit-appearance: none;
+            background: #cbdbe6;
+            border-radius: 5px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #3f8a7c;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            border: 2px solid white;
+        }
+        .value-badge {
+            background: #fff2e0;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #c2472a;
+        }
+        .info-panel {
+            background: #e6ede8;
+            border-radius: 40px;
+            padding: 10px 20px;
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-family: monospace;
+        }
+        .status {
+            font-weight: bold;
+            color: #1f5e6e;
+        }
+        button {
+            background: #ff884d;
+            border: none;
+            color: #1e1e2a;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.08s linear;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        button:active {
+            transform: translateY(2px);
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: #6b7e8c;
+        }
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .formula {
+            background: #f1f6fa;
+            border-radius: 28px;
+            padding: 10px 20px;
+            margin-top: 18px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #1a4e6e;
+        }
+        @media (max-width: 860px) {
+            .graph-box { min-width: 320px; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>⚙️ 二阶线性常系数齐次微分方程</h1>
+    <div class="sub">y'' + 2ζω₀ y' + ω₀² y = 0 &nbsp; | &nbsp; 阻尼振动 · 过阻尼/临界阻尼/欠阻尼</div>
+
+    <div class="flex-container">
+        <!-- 时域图 -->
+        <div class="graph-box">
+            <div class="graph-title">
+                <span>📈 时域响应 y(t)</span>
+                <span style="font-size:0.75rem;"> 初始条件: y(0)=1, y'(0)=0</span>
+            </div>
+            <canvas id="timeCanvas" width="650" height="360" style="width:100%; height:auto; max-width:650px; aspect-ratio:650/360"></canvas>
+            <div class="legend">
+                <span><span class="dot" style="background:#2c7da0;"></span> 位移 y(t)</span>
+                <span><span class="dot" style="background:#e67e22;"></span> 动态质点</span>
+                <span><span class="dot" style="background:#b0b0b0;"></span> 包络线 (欠阻尼)</span>
+            </div>
+        </div>
+
+        <!-- 相图 (y - y' 平面) -->
+        <div class="graph-box">
+            <div class="graph-title">
+                <span>🌀 相平面轨迹 ( y'  vs  y )</span>
+                <span style="font-size:0.75rem;"> 状态空间演化</span>
+            </div>
+            <canvas id="phaseCanvas" width="650" height="360" style="width:100%; height:auto; max-width:650px; aspect-ratio:650/360"></canvas>
+            <div class="legend">
+                <span><span class="dot" style="background:#e67e22;"></span> 运动点</span>
+                <span><span class="dot" style="background:#e63946;"></span> 相轨迹</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-bar">
+        <div class="slider-group">
+            <label>🎛️ 阻尼比 ζ <span id="zetaVal" class="value-badge">0.50</span></label>
+            <input type="range" id="zetaSlider" min="0.0" max="2.0" step="0.01" value="0.5">
+            <div style="font-size:0.7rem;">ζ &lt;1 欠阻尼 &nbsp;|&nbsp; ζ=1 临界阻尼 &nbsp;|&nbsp; ζ&gt;1 过阻尼</div>
+        </div>
+        <div class="slider-group">
+            <label>🎵 固有频率 ω₀ <span id="omegaVal" class="value-badge">2.00</span></label>
+            <input type="range" id="omegaSlider" min="0.8" max="5.0" step="0.05" value="2.0">
+        </div>
+        <div class="slider-group">
+            <label>⏱️ 动画速度 <span id="speedVal" class="value-badge">1.00</span></label>
+            <input type="range" id="speedSlider" min="0" max="2.0" step="0.02" value="1.0">
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <div>📐 当前状态: <span id="caseText" class="status">欠阻尼 (振荡衰减)</span></div>
+        <div>特征根: <span id="rootsText">—</span></div>
+        <div>
+            <button id="playBtn">▶ 播放</button>
+            <button id="resetBtn">⟳ 重置</button>
+        </div>
+    </div>
+
+    <div class="formula">
+        ✨ 解析解形式 —— 特征方程 r² + 2ζω₀ r + ω₀² = 0 → 特征根 r₁,₂ = -ζω₀ ± ω₀√(ζ²-1)<br>
+        根据 ζ 不同，解表现为 <strong>过阻尼</strong> (单调衰减)、<strong>临界阻尼</strong>、<strong>欠阻尼</strong> (振荡衰减)。
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- DOM 元素绑定 -----
+        const timeCanvas = document.getElementById('timeCanvas');
+        const phaseCanvas = document.getElementById('phaseCanvas');
+        const ctxTime = timeCanvas.getContext('2d');
+        const ctxPhase = phaseCanvas.getContext('2d');
+        
+        // 画布尺寸
+        const timeWidth = 650, timeHeight = 360;
+        const phaseWidth = 650, phaseHeight = 360;
+        timeCanvas.width = timeWidth;
+        timeCanvas.height = timeHeight;
+        phaseCanvas.width = phaseWidth;
+        phaseCanvas.height = phaseHeight;
+        
+        // 参数
+        let zeta = 0.5;      // 阻尼比
+        let omega0 = 2.0;    // 固有频率
+        let speedFactor = 1.0; // 动画速度
+        
+        // 初始条件
+        const y0 = 1.0;
+        const v0 = 0.0;
+        
+        // 时间范围: 动态调整显示范围（至少显示到振幅衰减到0.05或3个振荡周期）
+        let tMax = 6.0;
+        
+        // 动画时间 (秒)
+        let animTime = 0;
+        let animId = null;
+        let isPlaying = true;   // 默认自动播放
+        
+        // 解析解函数: 给定时间 t，返回 [y, y']
+        function computeSolution(t, z, w0) {
+            const delta = z * z - 1;
+            const wn = w0;
+            const wz = z * wn;
+            
+            if (Math.abs(z - 1.0) < 1e-6) {
+                // 临界阻尼
+                const A = y0;
+                const B = v0 + wn * y0;
+                const expTerm = Math.exp(-wn * t);
+                const y = expTerm * (A + B * t);
+                const yp = expTerm * (B - wn * (A + B * t));
+                return [y, yp];
+            } 
+            else if (z > 1) {
+                // 过阻尼
+                const sqrtDelta = Math.sqrt(z*z - 1);
+                const r1 = -z*wn + wn*sqrtDelta;
+                const r2 = -z*wn - wn*sqrtDelta;
+                const A = (v0 - r2*y0) / (r1 - r2);
+                const B = (r1*y0 - v0) / (r1 - r2);
+                const y = A * Math.exp(r1 * t) + B * Math.exp(r2 * t);
+                const yp = A * r1 * Math.exp(r1 * t) + B * r2 * Math.exp(r2 * t);
+                return [y, yp];
+            } 
+            else {
+                // 欠阻尼
+                const wd = wn * Math.sqrt(1 - z*z);
+                const A = y0;
+                const B = (v0 + z*wn*y0) / wd;
+                const expDecay = Math.exp(-z*wn*t);
+                const y = expDecay * (A * Math.cos(wd * t) + B * Math.sin(wd * t));
+                const yp = expDecay * ( (B*wd - A*z*wn)*Math.cos(wd*t) - (A*wd + B*z*wn)*Math.sin(wd*t) );
+                return [y, yp];
+            }
+        }
+        
+        // 动态调整 tMax: 确保显示足够长的时间范围 (衰减到 0.05 或至少 2 个振荡周期)
+        function updateTimeRange() {
+            let newTmax = 6.0;
+            if (zeta < 1) {
+                // 欠阻尼: 取 3 倍衰减时间常数 (1/(zeta*omega0)) 和 2.5 个振荡周期
+                const timeConst = 1 / (zeta * omega0);
+                const period = 2 * Math.PI / (omega0 * Math.sqrt(1 - zeta*zeta));
+                newTmax = Math.min(12, Math.max(4, 4 * timeConst, 2.5 * period));
+            } else if (Math.abs(zeta - 1) < 1e-6) {
+                // 临界阻尼: 衰减到 0.05 的时间约 (5/omega0)
+                newTmax = Math.min(10, Math.max(4, 5.5 / omega0));
+            } else {
+                // 过阻尼: 时间常数为两个指数中较慢的 1/|r1|, 取 4 倍
+                const sqrtDelta = Math.sqrt(zeta*zeta - 1);
+                const r1 = -zeta*omega0 + omega0*sqrtDelta;
+                const r2 = -zeta*omega0 - omega0*sqrtDelta;
+                const slowRate = Math.min(Math.abs(r1), Math.abs(r2));
+                newTmax = Math.min(12, Math.max(4, 4.5 / slowRate));
+            }
+            tMax = Math.min(14, Math.max(2.5, newTmax));
+        }
+        
+        // 获取用于绘图的时间序列 (从0到tMax, 步长)
+        function getTimeSeries() {
+            const steps = 500;
+            const series = [];
+            for (let i = 0; i <= steps; i++) {
+                const t = (i / steps) * tMax;
+                series.push(t);
+            }
+            return series;
+        }
+        
+        // 绘制时域曲线和动态点
+        function drawTimeDomain(animT) {
+            ctxTime.clearRect(0, 0, timeWidth, timeHeight);
+            drawTimeGrid();
+            
+            // 计算所有点
+            const times = getTimeSeries();
+            const points = times.map(t => {
+                const [y, yp] = computeSolution(t, zeta, omega0);
+                return { t, y };
+            });
+            
+            // 绘制曲线
+            ctxTime.beginPath();
+            let first = true;
+            for (let p of points) {
+                const x = timeToX(p.t);
+                const y = timeToY(p.y);
+                if (first) {
+                    ctxTime.moveTo(x, y);
+                    first = false;
+                } else {
+                    ctxTime.lineTo(x, y);
+                }
+            }
+            ctxTime.strokeStyle = "#2c7da0";
+            ctxTime.lineWidth = 2.2;
+            ctxTime.stroke();
+            
+            // 如果是欠阻尼，绘制包络线 ±e^{-ζω₀ t}
+            if (zeta < 1) {
+                const envPoints = times.map(t => {
+                    const env = Math.exp(-zeta * omega0 * t);
+                    return { t, env };
+                });
+                ctxTime.beginPath();
+                let firstPos = true, firstNeg = true;
+                for (let p of envPoints) {
+                    const x = timeToX(p.t);
+                    const yPos = timeToY(p.env);
+                    const yNeg = timeToY(-p.env);
+                    if (firstPos) {
+                        ctxTime.moveTo(x, yPos);
+                        firstPos = false;
+                    } else {
+                        ctxTime.lineTo(x, yPos);
+                    }
+                }
+                ctxTime.strokeStyle = "#b0b0b0";
+                ctxTime.setLineDash([5, 5]);
+                ctxTime.stroke();
+                ctxTime.beginPath();
+                for (let p of envPoints) {
+                    const x = timeToX(p.t);
+                    const yNeg = timeToY(-p.env);
+                    if (firstNeg) {
+                        ctxTime.moveTo(x, yNeg);
+                        firstNeg = false;
+                    } else {
+                        ctxTime.lineTo(x, yNeg);
+                    }
+                }
+                ctxTime.stroke();
+                ctxTime.setLineDash([]);
+            }
+            
+            // 动态小球
+            const [y_anim, yp_anim] = computeSolution(Math.min(animT, tMax), zeta, omega0);
+            const ballX = timeToX(animT);
+            const ballY = timeToY(y_anim);
+            ctxTime.beginPath();
+            ctxTime.arc(ballX, ballY, 6, 0, 2*Math.PI);
+            ctxTime.fillStyle = "#e67e22";
+            ctxTime.shadowBlur = 4;
+            ctxTime.fill();
+            ctxTime.beginPath();
+            ctxTime.arc(ballX, ballY, 2.5, 0, 2*Math.PI);
+            ctxTime.fillStyle = "#ffffff";
+            ctxTime.fill();
+            ctxTime.shadowBlur = 0;
+            
+            // 标注当前时间
+            ctxTime.fillStyle = "#c2472a";
+            ctxTime.font = "11px monospace";
+            ctxTime.fillText(`t = ${animT.toFixed(2)} s`, timeWidth - 90, 30);
+        }
+        
+        function drawTimeGrid() {
+            ctxTime.save();
+            ctxTime.strokeStyle = "#d0dee9";
+            ctxTime.lineWidth = 0.8;
+            // 纵向网格 t
+            const tTicks = [0, tMax/2, tMax];
+            tTicks.forEach(t => {
+                const x = timeToX(t);
+                ctxTime.beginPath();
+                ctxTime.moveTo(x, 0);
+                ctxTime.lineTo(x, timeHeight);
+                ctxTime.stroke();
+                ctxTime.fillStyle = "#6f8faa";
+                ctxTime.font = "10px monospace";
+                ctxTime.fillText(t.toFixed(1), x - 12, timeToY(0) + 12);
+            });
+            // 横向网格 y
+            const yTicks = [-1, -0.5, 0, 0.5, 1];
+            yTicks.forEach(y => {
+                const cy = timeToY(y);
+                ctxTime.beginPath();
+                ctxTime.moveTo(0, cy);
+                ctxTime.lineTo(timeWidth, cy);
+                ctxTime.stroke();
+                ctxTime.fillStyle = "#6f8faa";
+                ctxTime.fillText(y.toFixed(1), 6, cy - 3);
+            });
+            // 坐标轴
+            const zeroY = timeToY(0);
+            ctxTime.beginPath();
+            ctxTime.moveTo(0, zeroY);
+            ctxTime.lineTo(timeWidth, zeroY);
+            ctxTime.moveTo(timeToX(0), 0);
+            ctxTime.lineTo(timeToX(0), timeHeight);
+            ctxTime.strokeStyle = "#3c6e8f";
+            ctxTime.lineWidth = 1.8;
+            ctxTime.stroke();
+            ctxTime.fillStyle = "#3c6e8f";
+            ctxTime.font = "bold 12px";
+            ctxTime.fillText("t (s)", timeWidth - 15, zeroY - 6);
+            ctxTime.fillText("y(t)", timeToX(0) + 8, 18);
+            ctxTime.restore();
+        }
+        
+        // 相图绘制
+        function drawPhasePlane(animT) {
+            ctxPhase.clearRect(0, 0, phaseWidth, phaseHeight);
+            drawPhaseGrid();
+            
+            // 相轨迹: 计算 (y, y') 点集
+            const times = getTimeSeries();
+            const points = times.map(t => {
+                const [y, yp] = computeSolution(t, zeta, omega0);
+                return { y, yp };
+            });
+            ctxPhase.beginPath();
+            let first = true;
+            for (let p of points) {
+                const x = yToPhaseX(p.y);
+                const y = ypToPhaseY(p.yp);
+                if (first) {
+                    ctxPhase.moveTo(x, y);
+                    first = false;
+                } else {
+                    ctxPhase.lineTo(x, y);
+                }
+            }
+            ctxPhase.strokeStyle = "#e63946";
+            ctxPhase.lineWidth = 2.2;
+            ctxPhase.stroke();
+            
+            // 动态点
+            const [y_anim, yp_anim] = computeSolution(Math.min(animT, tMax), zeta, omega0);
+            const ballX = yToPhaseX(y_anim);
+            const ballY = ypToPhaseY(yp_anim);
+            ctxPhase.beginPath();
+            ctxPhase.arc(ballX, ballY, 6, 0, 2*Math.PI);
+            ctxPhase.fillStyle = "#e67e22";
+            ctxPhase.fill();
+            ctxPhase.beginPath();
+            ctxPhase.arc(ballX, ballY, 2.5, 0, 2*Math.PI);
+            ctxPhase.fillStyle = "#ffffff";
+            ctxPhase.fill();
+        }
+        
+        function drawPhaseGrid() {
+            ctxPhase.save();
+            ctxPhase.strokeStyle = "#d0dee9";
+            ctxPhase.lineWidth = 0.8;
+            // y 轴范围 [-1.2, 1.2], y' 范围 [-3, 3] 大致
+            const yTicks = [-1, -0.5, 0, 0.5, 1];
+            yTicks.forEach(y => {
+                const x = yToPhaseX(y);
+                ctxPhase.beginPath();
+                ctxPhase.moveTo(x, 0);
+                ctxPhase.lineTo(x, phaseHeight);
+                ctxPhase.stroke();
+                ctxPhase.fillStyle = "#6f8faa";
+                ctxPhase.font = "10px monospace";
+                ctxPhase.fillText(y.toFixed(1), x - 12, ypToPhaseY(0) + 12);
+            });
+            const ypTicks = [-2, -1, 0, 1, 2];
+            ypTicks.forEach(yp => {
+                const y = ypToPhaseY(yp);
+                ctxPhase.beginPath();
+                ctxPhase.moveTo(0, y);
+                ctxPhase.lineTo(phaseWidth, y);
+                ctxPhase.stroke();
+                ctxPhase.fillStyle = "#6f8faa";
+                ctxPhase.fillText(yp.toFixed(1), 6, y - 3);
+            });
+            // 坐标轴
+            const zeroY = ypToPhaseY(0);
+            const zeroX = yToPhaseX(0);
+            ctxPhase.beginPath();
+            ctxPhase.moveTo(0, zeroY);
+            ctxPhase.lineTo(phaseWidth, zeroY);
+            ctxPhase.moveTo(zeroX, 0);
+            ctxPhase.lineTo(zeroX, phaseHeight);
+            ctxPhase.strokeStyle = "#3c6e8f";
+            ctxPhase.lineWidth = 1.8;
+            ctxPhase.stroke();
+            ctxPhase.fillStyle = "#3c6e8f";
+            ctxPhase.font = "bold 12px";
+            ctxPhase.fillText("y", phaseWidth - 20, zeroY - 6);
+            ctxPhase.fillText("y'", zeroX + 8, 18);
+            ctxPhase.restore();
+        }
+        
+        // 坐标映射函数
+        function timeToX(t) {
+            return (t / tMax) * timeWidth;
+        }
+        function timeToY(y) {
+            // y 范围大致 [-1.2, 1.2]
+            const yRange = 1.35;
+            return timeHeight - ((y + yRange) / (2 * yRange)) * timeHeight;
+        }
+        function yToPhaseX(y) {
+            const xRange = 1.3;
+            return ((y + xRange) / (2 * xRange)) * phaseWidth;
+        }
+        function ypToPhaseY(yp) {
+            const ypRange = 3.2;
+            return phaseHeight - ((yp + ypRange) / (2 * ypRange)) * phaseHeight;
+        }
+        
+        // 更新文本信息（解的类型，特征根）
+        function updateStatusText() {
+            let caseStr = "";
+            let rootsStr = "";
+            if (zeta < 1) {
+                const wd = omega0 * Math.sqrt(1 - zeta*zeta);
+                caseStr = `欠阻尼 (振荡衰减)  ω_d = ${wd.toFixed(3)} rad/s`;
+                rootsStr = `r = -${(zeta*omega0).toFixed(3)} ± j${wd.toFixed(3)}`;
+            } else if (Math.abs(zeta - 1) < 1e-4) {
+                caseStr = `临界阻尼 (无振荡，最快衰减)`;
+                rootsStr = `r = -${omega0.toFixed(3)} (二重根)`;
+            } else {
+                const sqrtDelta = Math.sqrt(zeta*zeta - 1);
+                const r1 = -zeta*omega0 + omega0*sqrtDelta;
+                const r2 = -zeta*omega0 - omega0*sqrtDelta;
+                caseStr = `过阻尼 (单调衰减)`;
+                rootsStr = `r₁ = ${r1.toFixed(3)}, r₂ = ${r2.toFixed(3)}`;
+            }
+            document.getElementById('caseText').innerHTML = caseStr;
+            document.getElementById('rootsText').innerHTML = rootsStr;
+        }
+        
+        // 全局刷新 (参数改变时)
+        let currentAnimTime = 0;
+        function refreshAll(resetTime = true) {
+            if (resetTime) {
+                currentAnimTime = 0;
+                animTime = 0;
+            }
+            updateTimeRange();
+            updateStatusText();
+            drawTimeDomain(currentAnimTime);
+            drawPhasePlane(currentAnimTime);
+        }
+        
+        // 动画循环
+        let lastTimestamp = 0;
+        function animate(now) {
+            if (!isPlaying) {
+                animId = requestAnimationFrame(animate);
+                return;
+            }
+            if (!lastTimestamp) {
+                lastTimestamp = now;
+                animId = requestAnimationFrame(animate);
+                return;
+            }
+            let delta = Math.min(0.05, (now - lastTimestamp) / 1000);
+            if (delta > 0) {
+                let step = delta * speedFactor;
+                currentAnimTime += step;
+                if (currentAnimTime > tMax) {
+                    currentAnimTime = tMax;
+                    isPlaying = false;
+                    playBtn.textContent = "▶ 播放";
+                }
+                animTime = currentAnimTime;
+                drawTimeDomain(currentAnimTime);
+                drawPhasePlane(currentAnimTime);
+            }
+            lastTimestamp = now;
+            animId = requestAnimationFrame(animate);
+        }
+        
+        // 参数输入控件
+        const zetaSlider = document.getElementById('zetaSlider');
+        const omegaSlider = document.getElementById('omegaSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const zetaVal = document.getElementById('zetaVal');
+        const omegaVal = document.getElementById('omegaVal');
+        const speedVal = document.getElementById('speedVal');
+        const playBtn = document.getElementById('playBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        function updateParams() {
+            zeta = parseFloat(zetaSlider.value);
+            omega0 = parseFloat(omegaSlider.value);
+            speedFactor = parseFloat(speedSlider.value);
+            zetaVal.innerText = zeta.toFixed(2);
+            omegaVal.innerText = omega0.toFixed(2);
+            speedVal.innerText = speedFactor.toFixed(2);
+            // 重置动画时间，避免不连续
+            currentAnimTime = 0;
+            isPlaying = true;
+            playBtn.textContent = "⏸ 暂停";
+            refreshAll(true);
+        }
+        
+        function resetSimulation() {
+            currentAnimTime = 0;
+            isPlaying = true;
+            playBtn.textContent = "⏸ 暂停";
+            refreshAll(true);
+        }
+        
+        zetaSlider.addEventListener('input', updateParams);
+        omegaSlider.addEventListener('input', updateParams);
+        speedSlider.addEventListener('input', () => {
+            speedFactor = parseFloat(speedSlider.value);
+            speedVal.innerText = speedFactor.toFixed(2);
+        });
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            playBtn.textContent = isPlaying ? "⏸ 暂停" : "▶ 播放";
+            if (isPlaying && currentAnimTime >= tMax - 0.01) {
+                currentAnimTime = 0;
+                refreshAll(false);
+            }
+        });
+        resetBtn.addEventListener('click', () => {
+            isPlaying = true;
+            playBtn.textContent = "⏸ 暂停";
+            resetSimulation();
+        });
+        
+        // 初始化
+        updateParams();
+        refreshAll(true);
+        animId = requestAnimationFrame(animate);
+        window.addEventListener('resize', () => {
+            refreshAll(false);
+        });
+    })();
+</script>
+</body>
+</html>
